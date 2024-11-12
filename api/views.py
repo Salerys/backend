@@ -92,4 +92,30 @@ class DeleteAllPosts(APIView):
         )
 
 
+class UserActivityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, username):
+        user = User.objects.filter(username=username).first()
+        if not user:
+            return Response({"error": "User not found"}, status=404)
+
+        posts = Post.objects.filter(author=user).order_by('-created_at')
+        comments = (
+            Comment.objects.filter(author=user)
+            .select_related('post')
+            .order_by('-created_at')
+        ) 
+
+        post_serializer = PostSerializer(posts, many=True)
+        comment_serializer = CommentSerializer(comments, many=True)
+
+        return Response(
+            {
+                "posts": post_serializer.data,
+                "comments": comment_serializer.data,
+            }
+        )
+
+
 
