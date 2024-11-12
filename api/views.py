@@ -69,3 +69,27 @@ class EditUserView(generics.UpdateAPIView):
 
         return user  
 
+
+class DeleteUserView(generics.DestroyAPIView):
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+
+### Clear database (test only for me):
+class DeleteAllPosts(APIView):
+    def delete(self, request):
+        # Delete all posts
+        deleted_count, _ = Post.objects.all().delete()
+
+        # Return response
+        return Response(
+            {"message": f"{deleted_count} posts deleted."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
+
