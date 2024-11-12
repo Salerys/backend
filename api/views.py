@@ -118,4 +118,35 @@ class UserActivityView(APIView):
         )
 
 
+class GetPosts(APIView):
+    def get(self, request):
+        # Vote prefetch
+        posts = Post.objects.prefetch_related(
+            Prefetch('votes', queryset=Vote.objects.all(), to_attr='post_votes_set')
+        ).all()
+
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CreatePost(generics.ListCreateAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        post = serializer.save(author=self.request.user)
+        return post
+
+
+class RefreshPost(generics.RetrieveAPIView):
+    queryset = Post.objects.prefetch_related(
+        Prefetch('votes', queryset=Vote.objects.all(), to_attr='post_votes_set')
+    ).all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, *args, **kwargs):
+        post = self.get_object()
+        serializer = self.get_serializer(post)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
