@@ -201,3 +201,137 @@ class PostVoteView(generics.GenericAPIView):
         )
 
 
+class GetComments(generics.RetrieveAPIView):
+    queryset = Post.objects.prefetch_related(
+        'votes',
+        'comments__votes',
+    ).all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class CreateComment(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CommentSerializer
+
+    def perform_create(self, serializer):
+        post = get_object_or_404(Post, id=self.kwargs['post_id'])
+        serializer.save(author=self.request.user, post=post)
+
+
+class CommentVoteView(generics.GenericAPIView):
+    def post(self, request, post_id, comment_id):
+        vote_type = request.data.get('vote_type')
+
+        if vote_type not in [1, -1, None]:
+            return Response(
+                {
+                    "error": "Invalid vote type. Must be 1 (upvote), -1 (downvote), or null for removal."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        post = get_object_or_404(Post, id=post_id)
+
+        comment = get_object_or_404(post.comments.all(), id=comment_id)
+
+        content_type = ContentType.objects.get_for_model(Comment)
+
+        try:
+            vote = Vote.objects.get(
+                user=request.user, content_type=content_type, object_id=comment_id
+            )
+            if vote_type is None:
+                vote.delete()  
+            else:
+                if vote.value != vote_type:
+                    vote.value = vote_type
+                    vote.save()
+                else:
+                    vote.delete()  
+        except Vote.DoesNotExist:
+            if vote_type is not None:
+                Vote.objects.create(
+                    user=request.user,
+                    content_type=content_type,
+                    object_id=comment_id,
+                    value=vote_type,
+                )
+
+        return Response(
+            {
+                "message": "Vote toggled successfully.",
+                "upvotes": comment.upvotes,
+                "downvotes": comment.downvotes,
+                "total_votes": comment.total_votes,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class RefreshComment(generics.RetrieveAPIView):
+    queryset = Comment.objects.prefetch_related(
+        Prefetch('votes', queryset=Vote.objects.all(), to_attr='post_votes_set')
+    ).all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, *args, **kwargs):
+        comment = self.get_object()
+        serializer = self.get_serializer(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EditComment(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CommentSerializer
+
+    def get_object(self):
+        post_id = self.kwargs.get('post_id')
+        comment_id = self.kwargs.get('comment_id')
+
+        comment = get_object_or_404(Comment, id=comment_id, post__id=post_id)
+
+        # Check if the request user is the OG author
+        if comment.author != self.request.user:
+            self.permission_denied(
+                self.request, message="You do not have permission to edit this comment."
+            )
+
+        return comment
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DeleteComment(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        post_id = self.kwargs.get('post_id')
+        comment_id = self.kwargs.get('comment_id')
+
+        return get_object_or_404(Comment, id=comment_id, post__id=post_id)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Aadded for extra safety
+        if instance.author != request.user:
+            return Response(
+                {"detail": "You do not have permission to delete this comment."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Comment deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+
