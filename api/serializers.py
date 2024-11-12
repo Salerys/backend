@@ -4,7 +4,6 @@ from .models import UserProfile, Post, Comment, Vote, Tag
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.middleware.csrf import get_token
 from django.contrib.auth.hashers import check_password
-from django.db import models
 
 
 class CustomTokenSerializer(TokenObtainPairSerializer):
@@ -21,7 +20,7 @@ class CustomTokenSerializer(TokenObtainPairSerializer):
         request = self.context.get('request')
         if request:
             data['csrfToken'] = get_token(request)
-        return datadata
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
