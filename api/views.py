@@ -335,3 +335,49 @@ class DeleteComment(generics.DestroyAPIView):
         )
 
 
+class DeletePost(generics.DestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+
+    def get_object(self):
+        """
+        Ensures the post exists or sends 404 error.
+        """
+        obj = super().get_object()  
+        if obj.author.id != self.request.user.id:
+            raise PermissionDenied('You are not authorized to delete this post.')
+        return obj
+
+    def perform_destroy(self, instance):
+        """
+        """
+        instance.delete()
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )  # Return a 204 status
+
+
+class EditPost(generics.UpdateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'post_id'  # Use 'post_id' in the URL
+
+    def update(self, request, *args, **kwargs):
+        post = self.get_object()
+
+        if request.user != post.author:
+            return Response(
+                {"error": "You do not have permission to edit this post."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        serializer = self.get_serializer(post, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
