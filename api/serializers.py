@@ -154,3 +154,36 @@ class PostSerializer(serializers.ModelSerializer):
             post.tags.add(tag)
 
         return post
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    id = serializers.IntegerField(source='user.id', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ['username', 'id', 'email', 'bio', 'profile_picture']
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True)
+
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not check_password(value, user.password):
+            raise serializers.ValidationError("Current password is incorrect.")
+        return value
+
+    def validate_new_password(self, value):
+        if len(value) < 4:
+            raise serializers.ValidationError(
+                "New password must be at least 4 characters long."
+            )
+        return value
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
