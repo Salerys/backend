@@ -410,3 +410,29 @@ class ChangeUserPassword(generics.UpdateAPIView):
             {"message": "Password updated successfully"}, status=status.HTTP_200_OK
         )
 
+
+class SearchPost(generics.ListAPIView):
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        query = self.request.query_params.get('q', '').strip()
+
+        if not query:
+            return Post.objects.none()
+
+        return Post.objects.filter(
+            Q(title__icontains=query)
+            | Q(content__icontains=query)
+            | Q(author__username__icontains=query)
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        if not queryset.exists():
+            return Response(
+                {"detail": "No posts found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
