@@ -46,3 +46,47 @@ class UserSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+
+class VoteSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+
+    class Meta:
+        model = Vote
+        fields = ['user_id', 'value']
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source='author.username', read_only=True)
+    author_id = serializers.IntegerField(source='author.id', read_only=True)
+    upvotes = serializers.IntegerField(read_only=True)
+    downvotes = serializers.IntegerField(read_only=True)
+    total_votes = serializers.IntegerField(read_only=True)
+    votes = VoteSerializer(many=True, read_only=True)
+    post_title = serializers.CharField(source='post.title', read_only=True)
+    post_id = serializers.IntegerField(source='post.id', read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'post_id',
+            'post_title',
+            'author_id',
+            'author_username',
+            'content',
+            'created_at',
+            'updated_at',
+            'upvotes',
+            'downvotes',
+            'total_votes',
+            'votes',
+        ]
+        read_only_fields = [
+            'post_id',
+            'created_at',
+            'updated_at',
+            'upvotes',
+            'downvotes',
+            'total_votes',
+        ]
