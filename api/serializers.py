@@ -90,3 +90,67 @@ class CommentSerializer(serializers.ModelSerializer):
             'downvotes',
             'total_votes',
         ]
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+
+
+class PostSerializer(serializers.ModelSerializer):
+    upvotes = serializers.IntegerField(read_only=True)
+    downvotes = serializers.IntegerField(read_only=True)
+    total_votes = serializers.IntegerField(read_only=True)
+    author_id = serializers.IntegerField(source='author.id', read_only=True)
+    author_username = serializers.CharField(source='author.username', read_only=True)
+    comments_count = serializers.IntegerField(source='comments.count', read_only=True)
+    votes = VoteSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    category = serializers.ChoiceField(choices=Post.CATEGORY_CHOICES, required=False)
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = Post
+        fields = [
+            'id',
+            'author_id',
+            'author_username',
+            'title',
+            'content',
+            'created_at',
+            'updated_at',
+            'category',
+            'tags',
+            'upvotes',
+            'downvotes',
+            'total_votes',
+            'comments_count',
+            'votes',
+            'comments',
+        ]
+        read_only_fields = [
+            'created_at',
+            'updated_at',
+            'upvotes',
+            'downvotes',
+            'total_votes',
+            'comments_count',
+        ]
+
+    def create(self, validated_data):
+        tags_data = validated_data.pop('tags')
+
+        post = Post.objects.create(**validated_data)
+
+        for tag_data in tags_data:
+            tag_name = tag_data['name'].strip().lower()  
+
+            tag = Tag.objects.filter(name=tag_name).first()
+
+            if not tag:
+                tag = Tag.objects.create(name=tag_name)
+
+            post.tags.add(tag)
+
+        return post
