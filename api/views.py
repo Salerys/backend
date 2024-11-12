@@ -150,3 +150,54 @@ class RefreshPost(generics.RetrieveAPIView):
         serializer = self.get_serializer(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class PostVoteView(generics.GenericAPIView):
+    def post(self, request, post_id):
+        vote_type = request.data.get('vote_type')
+
+        if vote_type not in [1, -1, None]:
+            return Response(
+                {
+                    "error": "Invalid vote type. Must be 1 (upvote), -1 (downvote), or null for removal."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        post = get_object_or_404(Post, id=post_id)
+
+        content_type = ContentType.objects.get_for_model(Post)
+
+        try:
+            vote = Vote.objects.get(
+                user=request.user, content_type=content_type, object_id=post_id
+            )
+            if vote_type is None:
+                vote.delete()
+            else:
+                if vote.value != vote_type:
+                    vote.value = vote_type
+                    vote.save()
+                else:
+                    vote.delete()
+        except Vote.DoesNotExist:
+            if vote_type is not None:
+                Vote.objects.create(
+                    user=request.user,
+                    content_type=content_type,
+                    object_id=post_id,
+                    value=vote_type,
+                )
+
+        post_total_votes = post.total_votes
+
+        return Response(
+            {
+                "message": "Vote toggled successfully.",
+                "upvotes": post.upvotes,
+                "downvotes": post.downvotes,
+                "total_votes": post_total_votes,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
