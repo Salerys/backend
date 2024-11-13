@@ -31,10 +31,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = [
-'https://ppt5-social-media-app-backend-c4f9f27c2ec2.herokuapp.com',
-'https://ppt5-social-media-app-frontend-816a29351b29.herokuapp.com'
-]
+ALLOWED_HOSTS = ['*']
 
 
 REST_FRAMEWORK = {
