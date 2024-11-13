@@ -153,7 +153,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    os.getenv("FRONTEND_URL"),
+    os.getenv("FRONTEND_URL"),"https://ppt5-social-media-app-frontend-816a29351b29.herokuapp.com"
 ]
 CORS_ALLOWS_CREDENTIALS = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
