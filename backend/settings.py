@@ -32,8 +32,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = [
-    os.getenv('BACKEND_URL'), 
-    os.getenv('FRONTEND_URL')
+'https://ppt5-social-media-app-backend-c4f9f27c2ec2.herokuapp.com/',
+'https://ppt5-social-media-app-frontend-816a29351b29.herokuapp.com/'
 ]
 
 
