@@ -1,6 +1,6 @@
 # Definitely Not Reddit (DNR) Backend 
 
-This documentation covers the backend part of the project built with Django,  Django Rest Framework and React.<br>
+This documentation covers the backend part of the project built with Django, and Django Rest Framework.<br>
 
 [The Frontend can be found here:](https://github.com/Salerys/frontend)
 
