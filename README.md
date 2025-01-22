@@ -1,6 +1,6 @@
 # Definitely Not Reddit (DNR) Backend 
 
-This documentation covers the backend part of the project built with Django,  Django Rest Framework and React.<br>
+This documentation covers the backend part of the project built with Django, and Django Rest Framework.<br>
 
 [The Frontend can be found here:](https://github.com/Salerys/frontend)
 
@@ -107,6 +107,7 @@ During the development of this application, the following programs and tools hav
 - [Heroku Database](https://www.heroku.com) (Used for database hosting)
 - [Git](https://git-scm.com/) (Version control)
 - [GitHub](https://github.com/) (Used as cloud repository)
+- [dbdiagram.io](https://dbdiagram.io/) (Creating database visualization)
 - [Heroku](https://www.heroku.com) (Deployment of final application)
 - [Bruno](https://www.usebruno.com) (For API testing)
 - [Visual Studio Code](https://code.visualstudio.com/) (IDE - Integrated Development Environment)
@@ -181,3 +182,36 @@ The database for this project was deployed with the help of the [Heroku Database
 - When Heroku is done with the deployment, click "View" and start to use the
 - Use app
   <br>
+
+  ### Database Diagram
+![Definitely Not Reddit diagram](/documentation/images/ppt5dia.png/)
+
+ ### Known Unfixed Bugs
+
+- profile pictures aren't shown, as Heroku Database can't work with them. Outer tool such as Cloudinary is to be implemented
+- refresh user profile after voting (voting on own posts shown in user Profile changes the vote counter, but the User has to refresh for it to be shown on the Profile)
+- sorting by "most popular" doesn't work as intended, sorting doesn't happen
+- lack of interface notifications by user actions, such as post edit/delete/ or profile edit/deletion
+- refresh token works, but doesn't get called automatically. once the token expires, and the user navigates to "website root address", the token is refreshed. otherwise an error is shown.
+- security aspects directly in the settings file, they should be  hidden in the environment variable
+
+### Extra Mention
+
+Regarding the Github repository, there is a "contributor". The contributor is also me, as there was a bit of a mix-up while I was traveling and used the laptop of my sister, who also uses github.
+For the project itself it makes no difference, however for the sake of assessing the project, Code Institute Student Care has been informed of the details, please refer to those.
+
+
+## Credits
+
+### Resources
+
+- All content was written and created by me.<br>
+The project was inspired by ideas of my real life friends, and my Code Institute classmates (shown during weekly calls), as well as the famous platform Reddit, although personalized/customized greatly.<br>
+- A huge amount of Google searches were done along other sources like Stack , Reddit, Discord and the different documentations for Django, Bootstrap and React were used.<br>
+
+
+### Acknowledgements
+
+- Thanks to [Dennis Schenkel](https://github.com/DennisSchenkel) for answering my questions and his general layout of the ReadME file.
+- Thanks to Kay for they effort as a facilitator of the Code Institute team.
+- My great real life friends Thomas and Matthew.
