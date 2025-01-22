@@ -101,11 +101,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://u3hjvkstmnkorn:p182a260daa26f08cdd18549e3e02a8d4aa0dd964b7988e9cd16ec66f77e73a4e@c7u1tn6bvvsodf.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/d7b13shmpftklg',  
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 
@@ -152,9 +148,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    os.getenv("FRONTEND_URL"),"https://ppt5-social-media-app-frontend-816a29351b29.herokuapp.com"
-]
+CORS_ALLOWED_ORIGINS = [os.getenv("FRONTEND_URL")]
 CORS_ALLOWS_CREDENTIALS = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
