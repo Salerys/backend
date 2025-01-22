@@ -192,8 +192,7 @@ The database for this project was deployed with the help of the [Heroku Database
 - refresh user profile after voting (voting on own posts shown in user Profile changes the vote counter, but the User has to refresh for it to be shown on the Profile)
 - sorting by "most popular" doesn't work as intended, sorting doesn't happen
 - lack of interface notifications by user actions, such as post edit/delete/ or profile edit/deletion
-- refresh token works, but doesn't get called automatically. once the token expires, and the user navigates to "website root address", the token is refreshed. otherwise an error is shown.
-- security aspects directly in the settings file, they should be  hidden in the environment variable
+
 
 ### Extra Mention
 
